@@ -12,11 +12,19 @@
       background-color: #1f1f1f;
       color: #fff;
     }
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 0;
+    }
     .contenedor {
       display: flex;
       flex-direction: column;
       align-items: center;
       padding: 20px;
+      position: relative;
+      z-index: 1;
     }
     .fila-superior {
       display: flex;
@@ -78,6 +86,7 @@
   </style>
 </head>
 <body>
+  <canvas id="particles"></canvas>
   <div class="contenedor">
     <div class="fila-superior">
       <div class="formulario">
@@ -107,6 +116,7 @@
       <div id="tareasHoy"></div>
     </div>
   </div>
+
   <script>
     let doc;
 
@@ -213,7 +223,7 @@ CUIL: ${cuil}`;
       alert("✅ Tarea agregada");
     }
 
-    function verPendientesHoy() {
+    function verPend    function verPendientesHoy() {
       const hoy = new Date().toISOString().split("T")[0];
       const tareas = JSON.parse(localStorage.getItem("tareas")) || [];
       const tareasHoy = tareas.filter(t => t.fecha === hoy);
@@ -257,6 +267,36 @@ CUIL: ${cuil}`;
       localStorage.setItem("tareas", JSON.stringify(tareas));
       verPendientesHoy();
     }
+
+    // Animación de partículas
+    const canvas = document.getElementById("particles");
+    const ctx = canvas.getContext("2d");
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const particles = Array.from({ length: 100 }, () => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      r: Math.random() * 2 + 1,
+      dx: (Math.random() - 0.5) * 0.5,
+      dy: (Math.random() - 0.5) * 0.5
+    }));
+
+    function animateParticles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(p => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(255,255,255,0.3)";
+        ctx.fill();
+        p.x += p.dx;
+        p.y += p.dy;
+        if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
+        if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
+      });
+      requestAnimationFrame(animateParticles);
+    }
+    animateParticles();
   </script>
 </body>
 </html>
