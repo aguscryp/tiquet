@@ -3,193 +3,112 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Facturador + Calendario</title>
+  <title>Gestor de Tareas + Facturación</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --color-bg: #1F1F1F;
-      --color-primary: #A64EFF;
-      --color-accent: #FF4EC3;
-      --color-text: #FFFFFF;
-      --color-muted: #CCCCCC;
-    }
-
     body {
       margin: 0;
-      padding: 0;
-      font-family: 'Inter', sans-serif;
-      background-color: var(--color-bg);
-      color: var(--color-text);
-      min-height: 100vh;
-      overflow-x: hidden;
+      font-family: sans-serif;
+      background-color: #1f1f1f;
+      color: #fff;
     }
-
-    canvas {
-      position: fixed;
-      top: 0;
-      left: 0;
-      z-index: 0;
-    }
-
     .contenedor {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+    .fila-superior {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      gap: 30px;
-      padding: 40px 20px;
-      position: relative;
-      z-index: 1;
+      gap: 20px;
+      width: 100%;
     }
-
     .formulario {
-      flex: 1 1 320px;
-      max-width: 600px;
-      background-color: rgba(255, 255, 255, 0.05);
-      padding: 25px;
-      border-radius: 15px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-      backdrop-filter: blur(10px);
-      transition: transform 0.3s ease;
+      background-color: #2a2a2a;
+      padding: 20px;
+      border-radius: 10px;
+      width: 300px;
     }
-
-    .formulario:hover {
-      transform: scale(1.01);
-    }
-
     h2 {
-      font-size: 24px;
-      margin-bottom: 15px;
-      color: var(--color-accent);
+      color: #ff4ec3;
+      margin-bottom: 10px;
     }
-
     label {
       display: block;
       margin-top: 10px;
-      font-weight: 600;
-      text-align: left;
-      color: var(--color-muted);
     }
-
-    textarea, input[type="text"], input[type="date"] {
+    input, textarea {
       width: 100%;
-      padding: 10px;
+      padding: 8px;
       margin-top: 5px;
+      background-color: #333;
+      color: #fff;
       border: none;
-      border-radius: 8px;
-      font-size: 15px;
-      resize: vertical;
-      background-color: rgba(255,255,255,0.1);
-      color: var(--color-text);
+      border-radius: 5px;
     }
-
     button {
-      margin-top: 15px;
-      padding: 12px 25px;
-      background: linear-gradient(to right, var(--color-accent), var(--color-primary));
-      color: white;
-      border: none;
-      border-radius: 10px;
-      font-size: 15px;
-      cursor: pointer;
-      box-shadow: 0 4px 0 rgba(0,0,0,0.3);
-      transition: transform 0.1s ease, box-shadow 0.1s ease;
-    }
-
-    button:active {
-      transform: translateY(2px);
-      box-shadow: 0 2px 0 rgba(0,0,0,0.3);
-    }
-
-    #contador {
       margin-top: 10px;
-      font-size: 14px;
-      color: var(--color-muted);
+      padding: 10px;
+      background: linear-gradient(to right, #ff4ec3, #a64eff);
+      border: none;
+      border-radius: 5px;
+      color: white;
+      cursor: pointer;
     }
-
-    .copiado {
-      background: #28a745 !important;
-    }
-
     .calendario {
       margin-top: 30px;
+      background-color: #2a2a2a;
+      padding: 20px;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 700px;
     }
-
-    .tareas-dia {
-      margin-top: 10px;
-      font-size: 14px;
-      color: var(--color-muted);
-    }
-
     .tarea {
-      background-color: rgba(255,255,255,0.1);
+      background-color: #333;
       padding: 10px;
-      border-radius: 8px;
+      border-radius: 5px;
       margin-top: 10px;
     }
-
     .tarea.completada {
       text-decoration: line-through;
       opacity: 0.6;
     }
-
-    @media (max-width: 768px) {
-      .contenedor {
-        flex-direction: column;
-        padding: 20px 10px;
-      }
-    }
   </style>
 </head>
 <body>
-  <canvas id="particles"></canvas>
-
   <div class="contenedor">
-    <div class="formulario">
-      <h2>🚀 Facturador Electrónico</h2>
-      <label>Pegá los datos del cliente:</label>
-      <textarea id="datosCliente" rows="6" placeholder="Ejemplo:
-AYBAR MAXIMILIANO RICARDO
-20-36520980-5
-33 años
-Buenos Aires (Pcia)
-Villa Dominico"></textarea>
-      <button onclick="vistaPrevia()">Vista previa</button>
-      <button onclick="descargarPDF()">Descargar PDF</button>
+    <div class="fila-superior">
+      <div class="formulario">
+        <h2>Facturador Electrónico</h2>
+        <label>Datos del cliente:</label>
+        <textarea id="datosCliente" rows="6"></textarea>
+        <button onclick="vistaPrevia()">Vista previa</button>
+        <button onclick="descargarPDF()">Descargar PDF</button>
+      </div>
+      <div class="formulario">
+        <h2>Generador de Tíquet</h2>
+        <label>Datos del cliente:</label>
+        <textarea id="datosTiquet" rows="6"></textarea>
+        <button onclick="generarTiquet()">Generar Tíquet</button>
+        <button onclick="copiarTiquet()">Copiar al portapapeles</button>
+        <textarea id="mensajeTiquet" rows="10" readonly></textarea>
+      </div>
     </div>
-
-    <div class="formulario">
-      <h2>🎫 Generador de Tíquet</h2>
-      <label>Ingresá los datos del cliente:</label>
-      <textarea id="datosTiquet" rows="6" placeholder="Ejemplo:
-MIGUELES PABLO EXEQUIEL
-20-31567255-5
-40 años
-Entre Ríos
-Pueblo General Belgrano"></textarea>
-      <button onclick="generarTiquet()">Generar Tíquet</button>
-      <button id="btnCopiar" onclick="copiarTiquet()">Copiar al portapapeles</button>
-      <div id="contador">🎫 Tíquets generados: <span id="totalTiquets">0</span></div>
-      <textarea id="mensajeTiquet" rows="12" readonly style="margin-top:15px;"></textarea>
-    </div>
-
-    <div class="formulario calendario">
-      <h2>📅 Calendario de Tareas</h2>
+    <div class="calendario">
+      <h2>Calendario de Tareas</h2>
       <label>Fecha:</label>
       <input type="date" id="fechaTarea" />
-      <label>Cliente:</label>
-      <input type="text" id="clienteTarea" placeholder="Nombre del cliente" />
       <label>Descripción:</label>
-      <textarea id="descripcionTarea" rows="3" placeholder="Ej: seguimiento, pago, cita..."></textarea>
+      <textarea id="descripcionTarea" rows="3"></textarea>
       <button onclick="agregarTarea()">Agregar tarea</button>
       <button onclick="verPendientesHoy()">Ver mis pendientes de hoy</button>
-      <div id="tareasHoy" class="tareas-dia"></div>
+      <div id="tareasHoy"></div>
     </div>
   </div>
-
   <script>
     let doc;
-    let tiquetCount = 0;
 
     function generarPDF() {
       const { jsPDF } = window.jspdf;
@@ -209,11 +128,11 @@ Pueblo General Belgrano"></textarea>
 
       const clausula = `Estimado/a cliente:
 
-Le informamos que el monto de $5,000 abonado corresponde exclusivamente al proceso de evaluación y diagnóstico profesional...
+El monto de $5,000 abonado corresponde al proceso de evaluación profesional.
 
-Resultado de su evaluación: RECHAZADO
+Resultado: RECHAZADO
 
-Lamentablemente, no podremos avanzar con una colaboración en este momento...`;
+No podremos avanzar con una colaboración en este momento. Gracias por tu interés.`;
 
       doc.setFont("helvetica", "bold");
       doc.setTextColor(166, 78, 255);
@@ -221,37 +140,22 @@ Lamentablemente, no podremos avanzar con una colaboración en este momento...`;
       doc.text("Factura de Solicitud", 105, 20, { align: "center" });
 
       doc.setFontSize(12);
-      doc.setTextColor(0, 0, 0);
-      doc.setDrawColor(150);
-      doc.line(20, 30, 190, 30);
-      doc.text(`Factura Nº: #${String(facturaNum).padStart(4, '0')}`, 20, 38);
-      doc.text(`Fecha: ${fecha}`, 150, 38);
-      doc.text(`Cliente: ${nombre}`, 20, 46);
-      doc.text(`CUIL: ${cuil}`, 20, 53);
-      doc.text(`Edad: ${edad}`, 20, 60);
-      doc.text(`Provincia: ${provincia}`, 20, 67);
-      doc.text(`Localidad: ${localidad}`, 20, 74);
+      doc.setTextColor(255);
+      doc.text(`Factura Nº: #${String(facturaNum).padStart(4, '0')}`, 20, 30);
+      doc.text(`Fecha: ${fecha}`, 150, 30);
+      doc.text(`Cliente: ${nombre}`, 20, 40);
+      doc.text(`CUIL: ${cuil}`, 20, 48);
+      doc.text(`Edad: ${edad}`, 20, 56);
+      doc.text(`Provincia: ${provincia}`, 20, 64);
+      doc.text(`Localidad: ${localidad}`, 20, 72);
 
-      doc.line(20, 80, 190, 80);
-      doc.setFont("hel      doc.setFont("helvetica", "bold");
-      doc.text("Detalle de Factura:", 20, 88);
-      doc.setFont("helvetica", "normal");
-      doc.text("Concepto: Evaluación de solicitud", 20, 96);
-      doc.text("Monto: $5,000", 150, 96);
-      doc.line(20, 101, 190, 101);
-      doc.setFont("helvetica", "bold");
-      doc.text("Total: $5,000", 150, 108);
+      doc.text("Concepto: Evaluación de solicitud", 20, 90);
+      doc.text("Monto: $5,000", 150, 90);
+      doc.text("Total: $5,000", 150, 100);
 
-      doc.line(20, 113, 190, 113);
-      doc.setFont("helvetica", "bold");
-      doc.text("Cláusula Informativa:", 20, 121);
-      doc.setFont("helvetica", "normal");
+      doc.text("Cláusula Informativa:", 20, 120);
       const clausulaFormateada = doc.splitTextToSize(clausula, 170);
-      doc.text(clausulaFormateada, 20, 129);
-
-      doc.setFontSize(10);
-      doc.setTextColor(100);
-      doc.text("Factura electrónica profesional", 105, 285, { align: "center" });
+      doc.text(clausulaFormateada, 20, 130);
     }
 
     function vistaPrevia() {
@@ -272,64 +176,39 @@ Lamentablemente, no podremos avanzar con una colaboración en este momento...`;
       const cuil = datos[1] || "";
       const numeroTiquet = Math.floor(100000 + Math.random() * 900000);
 
-      const mensaje = `_TÍQUET GENERADO_ 📄
+      const mensaje = `🎫 TÍQUET #${numeroTiquet}
 
-¡Hola! 👋
+Hola ${nombre}, estamos procesando tu solicitud.
 
-Estamos procesando tu solicitud... ⏳
+Estado: En espera
+Tiempo estimado: 10-15 minutos
+Instagram: @auscryy
 
-*Tíquet:* #${numeroTiquet}
-*Estado:* _En lista de espera_
-*Tiempo estimado de respuesta:* 10-15 minutos
-
-En ocasiones, debido a inconvenientes técnicos, podemos tardar hasta 24hs en contestar. 🙏
-
-_¡No te preocupes!_ Estamos trabajando para ti. 💪
-
-*Respaldo:*
-Instagram: @auscryy 📸
-¡Síguenos y estate al tanto de nuestras historias! 👀
-
-_¡Gracias por tu paciencia!_ 🙏
-
-¡Esperamos tu comprensión!
-
-*Cliente:* ${nombre}
-*CUIL:* ${cuil}`;
+CUIL: ${cuil}`;
 
       document.getElementById("mensajeTiquet").value = mensaje;
-
-      tiquetCount++;
-      document.getElementById("totalTiquets").textContent = tiquetCount;
     }
 
     function copiarTiquet() {
       const mensaje = document.getElementById("mensajeTiquet");
-      const boton = document.getElementById("btnCopiar");
       mensaje.select();
-      mensaje.setSelectionRange(0, 99999);
       document.execCommand("copy");
-
-      boton.textContent = "¡Copiado!";
-      boton.classList.add("copiado");
-      setTimeout(() => {
-        boton.textContent = "Copiar al portapapeles";
-        boton.classList.remove("copiado");
-      }, 2000);
+      alert("¡Tíquet copiado al portapapeles!");
     }
 
     function agregarTarea() {
       const fecha = document.getElementById("fechaTarea").value;
-      const cliente = document.getElementById("clienteTarea").value.trim();
       const descripcion = document.getElementById("descripcionTarea").value.trim();
 
-      if (!fecha || !cliente || !descripcion) return alert("Completá todos los campos");
+      if (!fecha || !descripcion) {
+        alert("Completá la fecha y descripción");
+        return;
+      }
 
       const tareas = JSON.parse(localStorage.getItem("tareas")) || [];
-      tareas.push({ fecha, cliente, descripcion, estado: "pendiente" });
+      tareas.push({ fecha, descripcion, estado: "pendiente" });
       localStorage.setItem("tareas", JSON.stringify(tareas));
 
-      document.getElementById("clienteTarea").value = "";
       document.getElementById("descripcionTarea").value = "";
       alert("✅ Tarea agregada");
     }
@@ -343,16 +222,18 @@ _¡Gracias por tu paciencia!_ 🙏
       contenedor.innerHTML = "";
 
       if (tareasHoy.length === 0) {
-        contenedor.innerHTML = "📭 No tenés tareas para hoy.";
+        contenedor.innerHTML = "<p>No hay tareas para hoy.</p>";
         return;
       }
 
       tareasHoy.forEach((t, i) => {
         const div = document.createElement("div");
         div.className = "tarea" + (t.estado === "completada" ? " completada" : "");
-        div.innerHTML = `<strong>📌 ${t.cliente}</strong><br>${t.descripcion}<br>
-          <button onclick="completarTarea(${i})">✅ Marcar como completada</button>
-          <button onclick="eliminarTarea(${i})">🗑️ Eliminar</button>`;
+        div.innerHTML = `
+          <strong>${t.descripcion}</strong><br>
+          <button onclick="completarTarea(${i})">✅ Completar</button>
+          <button onclick="eliminarTarea(${i})">🗑️ Eliminar</button>
+        `;
         contenedor.appendChild(div);
       });
     }
@@ -361,7 +242,7 @@ _¡Gracias por tu paciencia!_ 🙏
       const hoy = new Date().toISOString().split("T")[0];
       const tareas = JSON.parse(localStorage.getItem("tareas")) || [];
       const tareasHoy = tareas.filter(t => t.fecha === hoy);
-      const tareaGlobalIndex = tareas.findIndex(t => t.fecha === hoy && t.cliente === tareasHoy[index].cliente && t.descripcion === tareasHoy[index].descripcion);
+      const tareaGlobalIndex = tareas.findIndex(t => t.fecha === hoy && t.descripcion === tareasHoy[index].descripcion);
       tareas[tareaGlobalIndex].estado = "completada";
       localStorage.setItem("tareas", JSON.stringify(tareas));
       verPendientesHoy();
@@ -371,40 +252,11 @@ _¡Gracias por tu paciencia!_ 🙏
       const hoy = new Date().toISOString().split("T")[0];
       const tareas = JSON.parse(localStorage.getItem("tareas")) || [];
       const tareasHoy = tareas.filter(t => t.fecha === hoy);
-      const tareaGlobalIndex = tareas.findIndex(t => t.fecha === hoy && t.cliente === tareasHoy[index].cliente && t.descripcion === tareasHoy[index].descripcion);
+      const tareaGlobalIndex = tareas.findIndex(t => t.fecha === hoy && t.descripcion === tareasHoy[index].descripcion);
       tareas.splice(tareaGlobalIndex, 1);
       localStorage.setItem("tareas", JSON.stringify(tareas));
       verPendientesHoy();
     }
-
-    const canvas = document.getElementById("particles");
-    const ctx = canvas.getContext("2d");
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-
-    const particles = Array.from({ length: 100 }, () => ({
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height,
-      r: Math.random() * 2 + 1,
-      dx: (Math.random() - 0.5) * 0.5,
-      dy: (Math.random() - 0.5) * 0.5
-    }));
-
-    function animateParticles() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      particles.forEach(p => {
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(255,255,255,0.3)";
-        ctx.fill();
-        p.x += p.dx;
-        p.y += p.dy;
-        if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
-        if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
-      });
-      requestAnimationFrame(animateParticles);
-    }
-    animateParticles();
   </script>
 </body>
 </html>
