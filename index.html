@@ -4,8 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Facturador Electrónico</title>
+
+  <!-- Librerías -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <!-- Estilos -->
   <style>
     :root {
       --color-bg: #1F1F1F;
@@ -14,6 +18,7 @@
       --color-text: #FFFFFF;
       --color-muted: #CCCCCC;
     }
+
     body {
       margin: 0;
       padding: 0;
@@ -23,12 +28,14 @@
       min-height: 100vh;
       overflow-x: hidden;
     }
+
     canvas {
       position: fixed;
       top: 0;
       left: 0;
       z-index: 0;
     }
+
     .contenedor {
       display: flex;
       flex-wrap: wrap;
@@ -38,6 +45,7 @@
       position: relative;
       z-index: 1;
     }
+
     .formulario {
       flex: 1 1 320px;
       max-width: 600px;
@@ -48,14 +56,17 @@
       backdrop-filter: blur(10px);
       transition: transform 0.3s ease;
     }
+
     .formulario:hover {
       transform: scale(1.01);
     }
+
     h2 {
       font-size: 24px;
       margin-bottom: 15px;
       color: var(--color-accent);
     }
+
     label {
       display: block;
       margin-top: 10px;
@@ -63,6 +74,7 @@
       text-align: left;
       color: var(--color-muted);
     }
+
     textarea {
       width: 100%;
       padding: 10px;
@@ -74,6 +86,7 @@
       background-color: rgba(255,255,255,0.1);
       color: var(--color-text);
     }
+
     button {
       margin-top: 15px;
       padding: 12px 25px;
@@ -86,22 +99,22 @@
       box-shadow: 0 4px 0 rgba(0,0,0,0.3);
       transition: transform 0.1s ease, box-shadow 0.1s ease;
     }
+
     button:active {
       transform: translateY(2px);
       box-shadow: 0 2px 0 rgba(0,0,0,0.3);
     }
+
     #contador {
       margin-top: 10px;
       font-size: 14px;
       color: var(--color-muted);
     }
+
     .copiado {
       background: #28a745 !important;
     }
-    @keyframes caer {
-      0% { transform: translateY(0); opacity: 1; }
-      100% { transform: translateY(100px); opacity: 0; }
-    }
+
     @media (max-width: 768px) {
       .contenedor {
         flex-direction: column;
@@ -110,244 +123,185 @@
     }
   </style>
 </head>
+
 <body>
-<canvas id="particles"></canvas>
-<div class="contenedor">
-  <div class="formulario">
-    <h2>🚀 Facturador Electrónico</h2>
-    <label>Pegá los datos del cliente:</label>
-    <textarea id="datosCliente" rows="6" placeholder="Ejemplo: AYBAR MAXIMILIANO RICARDO\n20-36520980-5\n33 años\nBuenos Aires (Pcia)\nVilla Dominico"></textarea>
-    <button onclick="vistaPrevia()">Vista previa</button>
-    <button onclick="descargarPDF()">Descargar PDF</button>
+  <canvas id="particles"></canvas>
+
+  <div class="contenedor">
+    <!-- Facturador -->
+    <div class="formulario">
+      <h2>🚀 Facturador Electrónico</h2>
+      <label>Pegá los datos del cliente:</label>
+      <textarea id="datosCliente" rows="6" placeholder="Ejemplo: AYBAR MAXIMILIANO RICARDO..."></textarea>
+      <button onclick="vistaPrevia()">Vista previa</button>
+      <button onclick="descargarPDF()">Descargar PDF</button>
+    </div>
+
+    <!-- Generador de Tíquet -->
+    <div class="formulario">
+      <h2>🎫 Generador de Tíquet</h2>
+      <label>Ingresá los datos del cliente:</label>
+      <textarea id="datosTiquet" rows="6" placeholder="Ejemplo: MIGUELES PABLO EXEQUIEL..."></textarea>
+      <button onclick="generarTiquet()">Generar Tíquet</button>
+      <button id="btnCopiar" onclick="copiarTiquet()">Copiar al portapapeles</button>
+      <div id="contador">🎫 Tíquets generados: <span id="totalTiquets">0</span></div>
+      <textarea id="mensajeTiquet" rows="12" readonly style="margin-top:15px;"></textarea>
+    </div>
   </div>
-  <div class="formulario">
-    <h2>🎫 Generador de Tíquet</h2>
-    <label>Ingresá los datos del cliente:</label>
-    <textarea id="datosTiquet" rows="6" placeholder="Ejemplo: MIGUELES PABLO EXEQUIEL\n20-31567255-5\n40 años\nEntre Ríos\nPueblo General Belgrano"></textarea>
-    <button onclick="generarTiquet()">Generar Tíquet</button>
-    <button id="btnCopiar" onclick="copiarTiquet()">Copiar al portapapeles</button>
-    <div id="contador">🎫 Tíquets generados: <span id="totalTiquets">0</span></div>
-    <textarea id="mensajeTiquet" rows="12" readonly style="margin-top:15px;"></textarea>
-  </div>
-  <div class="formulario">
-    <h2>📜 Historial</h2>
-    <div id="listaHistorial"></div>
-  </div>
-</div>
 
-<script>
-let doc;
-let tiquetCount = 0;
-const logros = [
-  { cantidad: 10, mensaje: "🥉 ¡Primer logro! 10 tíquets generados." },
-  { cantidad: 50, mensaje: "🥈 ¡Gran avance! 50 tíquets generados." },
-  { cantidad: 100, mensaje: "🥇 ¡Maestro del sistema! 100 tíquets generados." }
-];
+  <!-- Scripts -->
+  <script>
+    let doc;
+    let tiquetCount = 0;
 
-function lanzarConfeti() {
-  const confeti = document.createElement("div");
-  confeti.innerHTML = "🎉";
-  confeti.style.position = "fixed";
-  confeti.style.top = Math.random() * window.innerHeight + "px";
-  confeti.style.left = Math.random() * window.innerWidth + "px";
-  confeti.style.fontSize = "30px";
-  confeti.style.animation = "caer 2s ease-out";
-  confeti.style.zIndex = "9999";
-  document.body.appendChild(confeti);
-  setTimeout(() => confeti.remove(), 2000);
-}
+    // PDF
+    function generarPDF() {
+      const { jsPDF } = window.jspdf;
+      doc = new jsPDF();
 
-function guardarHistorial(tipo, datos) {
-  const historial = JSON.parse(localStorage.getItem("historial")) || [];
-  historial.push({ tipo, datos, fecha: new Date().toLocaleString() });
-  localStorage.setItem("historial", JSON.stringify(historial));
-  mostrarHistorial();
-}
+      const datos = document.getElementById("datosCliente").value.trim().split("\n");
+      const [nombre = "", cuil = "", edad = "", provincia = "", localidad = ""] = datos;
+      const fecha = new Date().toLocaleDateString();
 
-function mostrarHistorial() {
-  const historial = JSON.parse(localStorage.getItem("historial")) || [];
-  const contenedor = document.getElementById("listaHistorial");
-  contenedor.innerHTML = "";
-  historial.reverse().forEach((item, index) => {
-    const div = document.createElement("div");
-    div.style.marginBottom = "10px";
-    div.style.padding = "10px";
-    div.style.border = "1px solid #444";
-    div.style.borderRadius = "8px";
-    div.innerHTML = `
-      <strong>${item.tipo.toUpperCase()}</strong> - ${item.fecha}<br>
-      Cliente: ${item.datos.nombre || "N/A"}<br>
-      <button onclick="reusar(${historial.length - 1 - index})">Reusar</button>
-    `;
-    contenedor.appendChild(div);
-  });
-}
+      let facturaNum = localStorage.getItem("facturaNum");
+      facturaNum = facturaNum ? parseInt(facturaNum) + 1 : 1;
+      localStorage.setItem("facturaNum", facturaNum);
 
-function reusar(index) {
-  const historial = JSON.parse(localStorage.getItem("historial")) || [];
-  const item = historial[index];
-  if (item.tipo === "tiquet") {
-    document.getElementById("datosTiquet").value = item.datos.raw;
-    generarTiquet();
-  } else if (item.tipo === "factura") {
-    document.getElementById("datosCliente").value = item.datos.raw;
-    generarPDF();
-    vistaPrevia();
-  }
-}
+      const clausula = `Estimado/a cliente: Le informamos que el monto de $5,000 abonado corresponde exclusivamente al proceso de evaluación...`;
 
-function generarPDF() {
-  const { jsPDF } = window.jspdf;
-  doc = new jsPDF();
-  const datosRaw = document.getElementById("datosCliente").value.trim();
-  const datos = datosRaw.split("\n");
-  const nombre = datos[0] || "";
-  const cuil = datos[1] || "";
-  const edad = datos[2] || "";
-  const provincia = datos[  provincia = datos[3] || "";
-  const localidad = datos[4] || "";
-  const fecha = new Date().toLocaleDateString();
-  let facturaNum = localStorage.getItem("facturaNum");
-  facturaNum = facturaNum ? parseInt(facturaNum) + 1 : 1;
-  localStorage.setItem("facturaNum", facturaNum);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(166, 78, 255);
+      doc.setFontSize(18);
+      doc.text("Factura de Solicitud", 105, 20, { align: "center" });
 
-  const clausula = `Estimado/a cliente: Le informamos que el monto de $5,000 abonado corresponde exclusivamente al proceso de evaluación y diagnóstico profesional... Resultado de su evaluación: RECHAZADO. Lamentablemente, no podremos avanzar con una colaboración en este momento...`;
+      doc.setFontSize(12);
+      doc.setTextColor(0, 0, 0);
+      doc.setDrawColor(150);
+      doc.line(20, 30, 190, 30);
 
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(166, 78, 255);
-  doc.setFontSize(18);
-  doc.text("Factura de Solicitud", 105, 20, { align: "center" });
-  doc.setFontSize(12);
-  doc.setTextColor(0, 0, 0);
-  doc.setDrawColor(150);
-  doc.line(20, 30, 190, 30);
-  doc.text(`Factura Nº: #${String(facturaNum).padStart(4, '0')}`, 20, 38);
-  doc.text(`Fecha: ${fecha}`, 150, 38);
-  doc.text(`Cliente: ${nombre}`, 20, 46);
-  doc.text(`CUIL: ${cuil}`, 20, 53);
-  doc.text(`Edad: ${edad}`, 20, 60);
-  doc.text(`Provincia: ${provincia}`, 20, 67);
-  doc.text(`Localidad: ${localidad}`, 20, 74);
-  doc.line(20, 80, 190, 80);
-  doc.setFont("helvetica", "bold");
-  doc.text("Detalle de Factura:", 20, 88);
-  doc.setFont("helvetica", "normal");
-  doc.text("Concepto: Evaluación de solicitud", 20, 96);
-  doc.text("Monto: $5,000", 150, 96);
-  doc.line(20, 101, 190, 101);
-  doc.setFont("helvetica", "bold");
-  doc.text("Total: $5,000", 150, 108);
-  doc.line(20, 113, 190, 113);
-  doc.setFont("helvetica", "bold");
-  doc.text("Cláusula Informativa:", 20, 121);
-  doc.setFont("helvetica", "normal");
-  const clausulaFormateada = doc.splitTextToSize(clausula, 170);
-  doc.text(clausulaFormateada, 20, 129);
-  doc.setFontSize(10);
-  doc.setTextColor(100);
-  doc.text("Factura electrónica profesional", 105, 285, { align: "center" });
+      doc.text(`Factura Nº: #${String(facturaNum).padStart(4, '0')}`, 20, 38);
+      doc.text(`Fecha: ${fecha}`, 150, 38);
+      doc.text(`Cliente: ${nombre}`, 20, 46);
+      doc.text(`CUIL: ${cuil}`, 20, 53);
+      doc.text(`Edad: ${edad}`, 20, 60);
+      doc.text(`Provincia: ${provincia}`, 20, 67);
+      doc.text(`Localidad: ${localidad}`, 20, 74);
 
-  guardarHistorial("factura", { nombre, cuil, raw: datosRaw });
-  lanzarConfeti();
-}
+      doc.line(20, 80, 190, 80);
+      doc.setFont("helvetica", "bold");
+      doc.text("Detalle de Factura:", 20, 88);
+      doc.setFont("helvetica", "normal");
+      doc.text("Concepto: Evaluación de solicitud", 20, 96);
+      doc.text("Monto: $5,000", 150, 96);
 
-function vistaPrevia() {
-  generarPDF();
-  const pdfBlob = doc.output("blob");
-  const url = URL.createObjectURL(pdfBlob);
-  window.open(url, "_blank");
-}
+      doc.line(20, 101, 190, 101);
+      doc.setFont("helvetica", "bold");
+      doc.text("Total: $5,000", 150, 108);
+      doc.line(20, 113, 190, 113);
 
-function descargarPDF() {
-  if (!doc) generarPDF();
-  doc.save("factura_cliente.pdf");
-}
+      doc.text("Cláusula Informativa:", 20, 121);
+      doc.setFont("helvetica", "normal");
+      const clausulaFormateada = doc.splitTextToSize(clausula, 170);
+      doc.text(clausulaFormateada, 20, 129);
 
-function generarTiquet() {
-  const datosRaw = document.getElementById("datosTiquet").value.trim();
-  const datos = datosRaw.split("\n");
-  const nombre = datos[0] || "";
-  const cuil = datos[1] || "";
-  const numeroTiquet = Math.floor(100000 + Math.random() * 900000);
-  const mensaje = `_TÍQUET GENERADO_ 📄 ¡Hola! 👋 Estamos procesando tu solicitud... ⏳ *Tíquet:* #${numeroTiquet} *Estado:* _En lista de espera_ *Tiempo estimado de respuesta:* 10-15 minutos En ocasiones, debido a inconvenientes técnicos, podemos tardar hasta 24hs en contestar. 🙏 _¡No te preocupes!_ Estamos trabajando para ti. 💪 *Respaldo:* Instagram: @auscryy 📸 ¡Síguenos y estate al tanto de nuestras historias! 👀 _¡Gracias por tu paciencia!_ 🙏 ¡Esperamos tu comprensión! *Cliente:* ${nombre} *CUIL:* ${cuil}`;
-  document.getElementById("mensajeTiquet").value = mensaje;
-  tiquetCount++;
-  document.getElementById("totalTiquets").textContent = tiquetCount;
-  verificarLogros();
-  guardarHistorial("tiquet", { nombre, cuil, raw: datosRaw });
-  lanzarConfeti();
-}
-
-function verificarLogros() {
-  logros.forEach(logro => {
-    if (tiquetCount === logro.cantidad) {
-      alert(logro.mensaje);
-      mostrarMedalla(logro.mensaje);
+      doc.setFontSize(10);
+      doc.setTextColor(100);
+      doc.text("Factura electrónica profesional", 105, 285, { align: "center" });
     }
-  });
-}
 
-function mostrarMedalla(texto) {
-  const medalla = document.createElement("div");
-  medalla.textContent = texto;
-  medalla.style.position = "fixed";
-  medalla.style.top = "20px";
-  medalla.style.right = "20px";
-  medalla.style.background = "linear-gradient(to right, #FFD700, #FF8C00)";
-  medalla.style.color = "#fff";
-  medalla.style.padding = "15px";
-  medalla.style.borderRadius = "10px";
-  medalla.style.boxShadow = "0 0 10px rgba(0,0,0,0.5)";
-  medalla.style.zIndex = "9999";
-  document.body.appendChild(medalla);
-  setTimeout(() => medalla.remove(), 4000);
-}
+    function vistaPrevia() {
+      generarPDF();
+      const pdfBlob = doc.output("blob");
+      const url = URL.createObjectURL(pdfBlob);
+      window.open(url, "_blank");
+    }
 
-function copiarTiquet() {
-  const mensaje = document.getElementById("mensajeTiquet");
-  const boton = document.getElementById("btnCopiar");
-  mensaje.select();
-  mensaje.setSelectionRange(0, 99999);
-  document.execCommand("copy");
-  boton.textContent = "¡Copiado!";
-  boton.classList.add("copiado");
-  setTimeout(() => {
-    boton.textContent = "Copiar al portapapeles";
-    boton.classList.remove("copiado");
-  }, 2000);
-}
+    function descargarPDF() {
+      if (!doc) generarPDF();
+      doc.save("factura_cliente.pdf");
+    }
 
-const canvas = document.getElementById("particles");
-const ctx = canvas.getContext("2d");
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-const particles = Array.from({ length: 100 }, () => ({
-  x: Math.random() * canvas.width,
-  y: Math.random() * canvas.height,
-  r: Math.random() * 2 + 1,
-  dx: (Math.random() - 0.5) * 0.5,
-  dy: (Math.random() - 0.5) * 0.5
-}));
+    // Tíquet
+    function generarTiquet() {
+      const datos = document.getElementById("datosTiquet").value.trim().split("\n");
+      const [nombre = "", cuil = ""] = datos;
+      const numeroTiquet = Math.floor(100000 + Math.random() * 900000);
 
-function animateParticles() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  particles.forEach(p => {
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-    ctx.fillStyle = "rgba(255,255,255,0.3)";
-    ctx.fill();
-    p.x += p.dx;
-    p.y += p.dy;
-    if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
-    if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
-  });
-  requestAnimationFrame(animateParticles);
-}
-animateParticles();
-window.onload = () => {
-  mostrarHistorial();
-};
-</script>
+            const mensaje = `_TÍQUET GENERADO_ 📄
+¡Hola! 👋 Estamos procesando tu solicitud... ⏳
+
+*Tíquet:* #${numeroTiquet}
+*Estado:* _En lista de espera_
+*Tiempo estimado de respuesta:* 10-15 minutos
+
+En ocasiones, debido a inconvenientes técnicos, podemos tardar hasta 24hs en contestar. 🙏
+
+_¡No te preocupes!_ Estamos trabajando para ti. 💪
+
+*Respaldo:* Instagram: @auscryy 📸
+¡Síguenos y estate al tanto de nuestras historias! 👀
+
+_¡Gracias por tu paciencia!_ 🙏
+¡Esperamos tu comprensión!
+
+*Cliente:* ${nombre}
+*CUIL:* ${cuil}`;
+
+      document.getElementById("mensajeTiquet").value = mensaje;
+      tiquetCount++;
+      document.getElementById("totalTiquets").textContent = tiquetCount;
+    }
+
+    function copiarTiquet() {
+      const mensaje = document.getElementById("mensajeTiquet");
+      const boton = document.getElementById("btnCopiar");
+
+      mensaje.select();
+      mensaje.setSelectionRange(0, 99999);
+      document.execCommand("copy");
+
+      boton.textContent = "¡Copiado!";
+      boton.classList.add("copiado");
+
+      setTimeout(() => {
+        boton.textContent = "Copiar al portapapeles";
+        boton.classList.remove("copiado");
+      }, 2000);
+    }
+
+    // Partículas animadas
+    const canvas = document.getElementById("particles");
+    const ctx = canvas.getContext("2d");
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const particles = Array.from({ length: 100 }, () => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      r: Math.random() * 2 + 1,
+      dx: (Math.random() - 0.5) * 0.5,
+      dy: (Math.random() - 0.5) * 0.5
+    }));
+
+    function animateParticles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(p => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(255,255,255,0.3)";
+        ctx.fill();
+
+        p.x += p.dx;
+        p.y += p.dy;
+
+        if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
+        if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
+      });
+
+      requestAnimationFrame(animateParticles);
+    }
+
+    animateParticles();
+  </script>
 </body>
 </html>
-
