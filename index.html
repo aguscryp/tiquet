@@ -181,6 +181,7 @@
   <script>
     let doc;
     let tiquetCount = 0;
+    let resumenFacturaActual = "";
 
     function registrarMovimiento(tipo, resumen) {
       const lista = document.getElementById("listaMovimientos");
@@ -202,6 +203,9 @@
       let facturaNum = localStorage.getItem("facturaNum");
       facturaNum = facturaNum ? parseInt(facturaNum) + 1 : 1;
       localStorage.setItem("facturaNum", facturaNum);
+
+      resumenFacturaActual = `Cliente: ${nombre} • Factura #${String(facturaNum).padStart(4, '0')}`;
+      registrarMovimiento("Factura", resumenFacturaActual);
 
       const clausula = `Cláusula Informativa:
 Estimado/a cliente:
@@ -225,14 +229,14 @@ de evaluación y diagnóstico profesional...`;
       doc.text(`Edad: ${edad}`, 20, 60);
       doc.text(`Provincia: ${provincia}`, 20, 67);
       doc.text(`Localidad: ${localidad}`, 20, 74);
-
-      doc.line(20, 80, 190, 80);
+            doc.line(20, 80, 190, 80);
       doc.setFont("helvetica", "bold");
       doc.text("Detalle de Factura:", 20, 88);
       doc.setFont("helvetica", "normal");
       doc.text("Concepto: Evaluación de solicitud", 20, 96);
       doc.text("Monto: $5,000", 150, 96);
-            doc.line(20, 101, 190, 101);
+
+      doc.line(20, 101, 190, 101);
       doc.setFont("helvetica", "bold");
       doc.text("Total: $5,000", 150, 108);
       doc.line(20, 113, 190, 113);
@@ -245,8 +249,6 @@ de evaluación y diagnóstico profesional...`;
       doc.setFontSize(10);
       doc.setTextColor(100);
       doc.text("Factura electrónica profesional", 105, 285, { align: "center" });
-
-      registrarMovimiento("Factura", `Cliente: ${nombre} • Factura #${String(facturaNum).padStart(4, '0')}`);
     }
 
     function vistaPrevia() {
@@ -257,7 +259,11 @@ de evaluación y diagnóstico profesional...`;
     }
 
     function descargarPDF() {
-      if (!doc) generarPDF();
+      if (!doc) {
+        generarPDF();
+      } else if (resumenFacturaActual) {
+        registrarMovimiento("Factura", resumenFacturaActual);
+      }
       doc.save("factura_cliente.pdf");
     }
 
@@ -346,5 +352,7 @@ _¡Gracias por tu paciencia!_ 🙏
   </script>
 </body>
 </html>
+
+
 
 
