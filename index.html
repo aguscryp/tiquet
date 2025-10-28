@@ -1,1 +1,267 @@
 
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Facturador Electrónico</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #2c5364, #203a43, #0f2027);
+      height: 100vh;
+      overflow: auto;
+      position: relative;
+    }
+
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 0;
+    }
+
+    .formulario {
+      position: relative;
+      z-index: 1;
+      background: white;
+      padding: 30px;
+      max-width: 700px;
+      margin: 60px auto;
+      border-radius: 15px;
+      box-shadow: 0 0 30px rgba(0,0,0,0.3);
+      text-align: center;
+    }
+
+    h2 {
+      font-size: 28px;
+      margin-bottom: 20px;
+      color: #007bff;
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: 600;
+      text-align: left;
+    }
+
+    textarea {
+      width: 100%;
+      padding: 12px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 12px 25px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="particles"></canvas>
+
+  <div class="formulario">
+    <h2>🚀 Facturador Electrónico</h2>
+    <label>Pegá los datos del cliente:</label>
+    <textarea id="datosCliente" rows="6" placeholder="Ejemplo:
+AYBAR MAXIMILIANO RICARDO
+20-36520980-5
+33 años
+Buenos Aires (Pcia)
+Villa Dominico"></textarea>
+    <button onclick="vistaPrevia()">Vista previa</button>
+    <button onclick="descargarPDF()">Descargar PDF</button>
+  </div>
+
+  <div class="formulario">
+    <h2>🎫 Generador de Tíquet</h2>
+    <label>Ingresá los datos del cliente:</label>
+    <textarea id="datosTiquet" rows="6" placeholder="Ejemplo:
+MIGUELES PABLO EXEQUIEL
+20-31567255-5
+40 años
+Entre Ríos
+Pueblo General Belgrano"></textarea>
+    <button onclick="generarTiquet()">Generar Tíquet</button>
+    <button onclick="copiarTiquet()">Copiar al portapapeles</button>
+    <textarea id="mensajeTiquet" rows="12" readonly style="margin-top:15px;"></textarea>
+  </div>
+
+  <script>
+    let doc;
+
+    function generarPDF() {
+      const { jsPDF } = window.jspdf;
+      doc = new jsPDF();
+
+      const datos = document.getElementById("datosCliente").value.trim().split("\n");
+      const nombre = datos[0] || "";
+      const cuil = datos[1] || "";
+      const edad = datos[2] || "";
+      const provincia = datos[3] || "";
+      const localidad = datos[4] || "";
+
+      const fecha = new Date().toLocaleDateString();
+      let facturaNum = localStorage.getItem("facturaNum");
+      facturaNum = facturaNum ? parseInt(facturaNum) + 1 : 1;
+      localStorage.setItem("facturaNum", facturaNum);
+
+      const clausula = `
+Estimado/a cliente:
+
+Le informamos que el monto de $5,000 abonado corresponde exclusivamente al proceso de evaluación y diagnóstico profesional, destinado a determinar su aptitud para trabajar bajo nuestra metodología.
+
+Actualmente gestionamos más de 557 clientes activos y hemos expandido nuestros servicios de forma digital, lo que nos permite ofrecer esta experiencia de manera remota. Como en todo proceso profesional, los resultados pueden variar.
+
+Resultado de su evaluación: RECHAZADO
+
+Lamentablemente, no podremos avanzar con una colaboración en este momento. Es importante destacar que el monto abonado ha sido consumido por el sistema en el proceso de análisis, y no se contempla ningún tipo de reembolso una vez iniciado el diagnóstico.
+
+Antes de realizar el pago, usted aceptó los términos informativos donde se especifica que el resultado puede ser aceptado o rechazado, y que no depende exclusivamente de nuestra decisión.
+
+Somos emprendedores comprometidos con la ética y la transparencia. Jamás nos hemos quedado con dinero ajeno, y trabajamos día a día para brindar lo mejor a cada cliente.
+
+Agradecemos su interés y le deseamos lo mejor en sus próximos proyectos.
+      `;
+
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(0, 102, 204);
+      doc.setFontSize(18);
+      doc.text("Factura de Solicitud", 105, 20, { align: "center" });
+
+      doc.setFontSize(12);
+      doc.setTextColor(0, 0, 0);
+      doc.setDrawColor(150);
+      doc.line(20, 30, 190, 30);
+      doc.text(`Factura Nº: #${String(facturaNum).padStart(4, '0')}`, 20, 38);
+      doc.text(`Fecha: ${fecha}`, 150, 38);
+      doc.text(`Cliente: ${nombre}`, 20, 46);
+      doc.text(`CUIL: ${cuil}`, 20, 53);
+      doc.text(`Edad: ${edad}`, 20, 60);
+      doc.text(`Provincia: ${provincia}`, 20, 67);
+      doc.text(`Localidad: ${localidad}`, 20, 74);
+
+      doc.line(20, 80, 190, 80);
+      doc.setFont("helvetica", "bold");
+      doc.text("Detalle de Factura:", 20, 88);
+      doc.setFont("helvetica", "normal");
+      doc.text("Concepto: Evaluación de solicitud", 20, 96);
+      doc.text("Monto: $5,000", 150, 96);
+      doc.line(20, 101, 190, 101);
+      doc.setFont("helvetica", "bold");
+      doc.text("Total: $5,000", 150, 108);
+
+      doc.line(20, 113, 190, 113);
+      doc.setFont("helvetica", "bold");
+      doc.text("Cláusula Informativa:", 20, 121);
+      doc.setFont("helvetica", "normal");
+      const clausulaFormateada = doc.splitTextToSize(clausula, 170);
+      doc.text(clausulaFormateada, 20, 129);
+
+      doc.setFontSize(10);
+      doc.setTextColor(100);
+      doc.text("Factura electrónica profesional", 105, 285, { align: "center" });
+    }
+
+    function vistaPrevia() {
+      generarPDF();
+      const pdfBlob = doc.output("blob");
+      const url = URL.createObjectURL(pdfBlob);
+      window.open(url, "_blank");
+    }
+
+    function descargarPDF() {
+      if (!doc) generarPDF();
+      doc.save("factura_cliente.pdf");
+    }
+
+    function generarTiquet() {
+      const datos = document.getElementById("datosTiquet").value.trim().split("\n");
+      const nombre = datos[0] || "";
+      const cuil = datos[1] || "";
+      const numeroTiquet = Math.floor(100000 + Math.random() * 900000);
+
+      const mensaje = `_TÍQUET GENERADO_ 📄
+
+¡Hola! 👋
+
+Estamos procesando tu solicitud... ⏳
+
+*Tíquet:* #${numeroTiquet}
+*Estado:* _En lista de espera_
+*Tiempo estimado de respuesta:* 10-15 minutos
+
+En ocasiones, debido a inconvenientes técnicos, podemos tardar hasta 24hs en contestar. 🙏
+
+_¡No te preocupes!_ Estamos trabajando para ti. 💪
+
+*Respaldo:*
+Instagram: @auscryy 📸
+¡Síguenos y estate al tanto de nuestras historias! 👀
+
+_¡Gracias por tu paciencia!_ 🙏
+
+¡Esperamos tu comprensión!
+
+*Cliente:* ${nombre}
+*CUIL:* ${cuil}`;
+
+      document.getElementById("mensajeTiquet").value = mensaje;
+    }
+
+    function copiarTiquet() {
+      const mensaje = document.getElementById("mensajeTiquet");
+      mensaje.select();
+      mensaje.setSelectionRange(0, 99999);
+      document.execCommand("copy");
+      alert("¡      alert("¡Mensaje copiado al portapapeles!");
+    }
+
+    // Partículas animadas
+    const canvas = document.getElementById("particles");
+    const ctx = canvas.getContext("2d");
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const particles = Array.from({ length: 100 }, () => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      r: Math.random() * 2 + 1,
+      dx: (Math.random() - 0.5) * 0.5,
+      dy: (Math.random() - 0.5) * 0.5
+    }));
+
+    function animateParticles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(p => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(255,255,255,0.3)";
+        ctx.fill();
+        p.x += p.dx;
+        p.y += p.dy;
+        if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
+        if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
+      });
+      requestAnimationFrame(animateParticles);
+    }
+    animateParticles();
+  </script>
+</body>
+</html>
