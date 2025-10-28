@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Facturador Electrónico</title>
+  <title>Facturador + Calendario</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
@@ -71,7 +71,7 @@
       color: var(--color-muted);
     }
 
-    textarea {
+    textarea, input[type="text"], input[type="date"] {
       width: 100%;
       padding: 10px;
       margin-top: 5px;
@@ -109,6 +109,28 @@
 
     .copiado {
       background: #28a745 !important;
+    }
+
+    .calendario {
+      margin-top: 30px;
+    }
+
+    .tareas-dia {
+      margin-top: 10px;
+      font-size: 14px;
+      color: var(--color-muted);
+    }
+
+    .tarea {
+      background-color: rgba(255,255,255,0.1);
+      padding: 10px;
+      border-radius: 8px;
+      margin-top: 10px;
+    }
+
+    .tarea.completada {
+      text-decoration: line-through;
+      opacity: 0.6;
     }
 
     @media (max-width: 768px) {
@@ -149,6 +171,19 @@ Pueblo General Belgrano"></textarea>
       <button id="btnCopiar" onclick="copiarTiquet()">Copiar al portapapeles</button>
       <div id="contador">🎫 Tíquets generados: <span id="totalTiquets">0</span></div>
       <textarea id="mensajeTiquet" rows="12" readonly style="margin-top:15px;"></textarea>
+    </div>
+
+    <div class="formulario calendario">
+      <h2>📅 Calendario de Tareas</h2>
+      <label>Fecha:</label>
+      <input type="date" id="fechaTarea" />
+      <label>Cliente:</label>
+      <input type="text" id="clienteTarea" placeholder="Nombre del cliente" />
+      <label>Descripción:</label>
+      <textarea id="descripcionTarea" rows="3" placeholder="Ej: seguimiento, pago, cita..."></textarea>
+      <button onclick="agregarTarea()">Agregar tarea</button>
+      <button onclick="verPendientesHoy()">Ver mis pendientes de hoy</button>
+      <div id="tareasHoy" class="tareas-dia"></div>
     </div>
   </div>
 
@@ -198,7 +233,7 @@ Lamentablemente, no podremos avanzar con una colaboración en este momento...`;
       doc.text(`Localidad: ${localidad}`, 20, 74);
 
       doc.line(20, 80, 190, 80);
-      doc.setFont("helvetica", "bold");
+      doc.setFont("hel      doc.setFont("helvetica", "bold");
       doc.text("Detalle de Factura:", 20, 88);
       doc.setFont("helvetica", "normal");
       doc.text("Concepto: Evaluación de solicitud", 20, 96);
@@ -283,6 +318,65 @@ _¡Gracias por tu paciencia!_ 🙏
       }, 2000);
     }
 
+    function agregarTarea() {
+      const fecha = document.getElementById("fechaTarea").value;
+      const cliente = document.getElementById("clienteTarea").value.trim();
+      const descripcion = document.getElementById("descripcionTarea").value.trim();
+
+      if (!fecha || !cliente || !descripcion) return alert("Completá todos los campos");
+
+      const tareas = JSON.parse(localStorage.getItem("tareas")) || [];
+      tareas.push({ fecha, cliente, descripcion, estado: "pendiente" });
+      localStorage.setItem("tareas", JSON.stringify(tareas));
+
+      document.getElementById("clienteTarea").value = "";
+      document.getElementById("descripcionTarea").value = "";
+      alert("✅ Tarea agregada");
+    }
+
+    function verPendientesHoy() {
+      const hoy = new Date().toISOString().split("T")[0];
+      const tareas = JSON.parse(localStorage.getItem("tareas")) || [];
+      const tareasHoy = tareas.filter(t => t.fecha === hoy);
+
+      const contenedor = document.getElementById("tareasHoy");
+      contenedor.innerHTML = "";
+
+      if (tareasHoy.length === 0) {
+        contenedor.innerHTML = "📭 No tenés tareas para hoy.";
+        return;
+      }
+
+      tareasHoy.forEach((t, i) => {
+        const div = document.createElement("div");
+        div.className = "tarea" + (t.estado === "completada" ? " completada" : "");
+        div.innerHTML = `<strong>📌 ${t.cliente}</strong><br>${t.descripcion}<br>
+          <button onclick="completarTarea(${i})">✅ Marcar como completada</button>
+          <button onclick="eliminarTarea(${i})">🗑️ Eliminar</button>`;
+        contenedor.appendChild(div);
+      });
+    }
+
+    function completarTarea(index) {
+      const hoy = new Date().toISOString().split("T")[0];
+      const tareas = JSON.parse(localStorage.getItem("tareas")) || [];
+      const tareasHoy = tareas.filter(t => t.fecha === hoy);
+      const tareaGlobalIndex = tareas.findIndex(t => t.fecha === hoy && t.cliente === tareasHoy[index].cliente && t.descripcion === tareasHoy[index].descripcion);
+      tareas[tareaGlobalIndex].estado = "completada";
+      localStorage.setItem("tareas", JSON.stringify(tareas));
+      verPendientesHoy();
+    }
+
+    function eliminarTarea(index) {
+      const hoy = new Date().toISOString().split("T")[0];
+      const tareas = JSON.parse(localStorage.getItem("tareas")) || [];
+      const tareasHoy = tareas.filter(t => t.fecha === hoy);
+      const tareaGlobalIndex = tareas.findIndex(t => t.fecha === hoy && t.cliente === tareasHoy[index].cliente && t.descripcion === tareasHoy[index].descripcion);
+      tareas.splice(tareaGlobalIndex, 1);
+      localStorage.setItem("tareas", JSON.stringify(tareas));
+      verPendientesHoy();
+    }
+
     const canvas = document.getElementById("particles");
     const ctx = canvas.getContext("2d");
     canvas.width = window.innerWidth;
@@ -314,4 +408,3 @@ _¡Gracias por tu paciencia!_ 🙏
   </script>
 </body>
 </html>
-
