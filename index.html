@@ -2,19 +2,27 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Facturador Electrónico</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --color-bg: #1F1F1F;
+      --color-primary: #A64EFF;
+      --color-accent: #FF4EC3;
+      --color-text: #FFFFFF;
+      --color-muted: #CCCCCC;
+    }
+
     body {
       margin: 0;
       padding: 0;
-      font-family: 'Poppins', sans-serif;
-      background: linear-gradient(to right, #2c5364, #203a43, #0f2027);
+      font-family: 'Inter', sans-serif;
+      background-color: var(--color-bg);
+      color: var(--color-text);
       min-height: 100vh;
       overflow-x: hidden;
-      position: relative;
-      color: #333;
     }
 
     canvas {
@@ -30,17 +38,18 @@
       justify-content: center;
       gap: 30px;
       padding: 40px 20px;
-      z-index: 1;
       position: relative;
+      z-index: 1;
     }
 
     .formulario {
       flex: 1 1 320px;
       max-width: 600px;
-      background: rgba(255, 255, 255, 0.95);
+      background-color: rgba(255, 255, 255, 0.05);
       padding: 25px;
       border-radius: 15px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+      backdrop-filter: blur(10px);
       transition: transform 0.3s ease;
     }
 
@@ -51,7 +60,7 @@
     h2 {
       font-size: 24px;
       margin-bottom: 15px;
-      color: #007bff;
+      color: var(--color-accent);
     }
 
     label {
@@ -59,40 +68,43 @@
       margin-top: 10px;
       font-weight: 600;
       text-align: left;
+      color: var(--color-muted);
     }
 
     textarea {
       width: 100%;
       padding: 10px;
       margin-top: 5px;
-      border: 1px solid #ccc;
+      border: none;
       border-radius: 8px;
       font-size: 15px;
       resize: vertical;
+      background-color: rgba(255,255,255,0.1);
+      color: var(--color-text);
     }
 
     button {
       margin-top: 15px;
       padding: 12px 25px;
-      background: linear-gradient(to bottom, #007bff, #0056b3);
+      background: linear-gradient(to right, var(--color-accent), var(--color-primary));
       color: white;
       border: none;
       border-radius: 10px;
       font-size: 15px;
       cursor: pointer;
-      box-shadow: 0 4px 0 #003d80;
+      box-shadow: 0 4px 0 rgba(0,0,0,0.3);
       transition: transform 0.1s ease, box-shadow 0.1s ease;
     }
 
     button:active {
       transform: translateY(2px);
-      box-shadow: 0 2px 0 #003d80;
+      box-shadow: 0 2px 0 rgba(0,0,0,0.3);
     }
 
     #contador {
       margin-top: 10px;
       font-size: 14px;
-      color: #555;
+      color: var(--color-muted);
     }
 
     .copiado {
@@ -169,7 +181,7 @@ Resultado de su evaluación: RECHAZADO
 Lamentablemente, no podremos avanzar con una colaboración en este momento...`;
 
       doc.setFont("helvetica", "bold");
-      doc.setTextColor(0, 102, 204);
+      doc.setTextColor(166, 78, 255);
       doc.setFontSize(18);
       doc.text("Factura de Solicitud", 105, 20, { align: "center" });
 
@@ -252,7 +264,6 @@ _¡Gracias por tu paciencia!_ 🙏
 
       document.getElementById("mensajeTiquet").value = mensaje;
 
-      // Actualizar contador visual
       tiquetCount++;
       document.getElementById("totalTiquets").textContent = tiquetCount;
     }
@@ -264,7 +275,6 @@ _¡Gracias por tu paciencia!_ 🙏
       mensaje.setSelectionRange(0, 99999);
       document.execCommand("copy");
 
-      // Feedback visual
       boton.textContent = "¡Copiado!";
       boton.classList.add("copiado");
       setTimeout(() => {
@@ -273,7 +283,6 @@ _¡Gracias por tu paciencia!_ 🙏
       }, 2000);
     }
 
-    // Partículas animadas
     const canvas = document.getElementById("particles");
     const ctx = canvas.getContext("2d");
     canvas.width = window.innerWidth;
