@@ -4,15 +4,17 @@
   <meta charset="UTF-8" />
   <title>Facturador Electrónico</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <style>
     body {
       margin: 0;
       padding: 0;
-      font-family: 'Segoe UI', sans-serif;
+      font-family: 'Poppins', sans-serif;
       background: linear-gradient(to right, #2c5364, #203a43, #0f2027);
       min-height: 100vh;
       overflow-x: hidden;
       position: relative;
+      color: #333;
     }
 
     canvas {
@@ -25,13 +27,18 @@
     .formulario {
       position: relative;
       z-index: 1;
-      background: white;
+      background: rgba(255, 255, 255, 0.95);
       padding: 30px;
       max-width: 700px;
       margin: 60px auto;
       border-radius: 15px;
       box-shadow: 0 0 30px rgba(0,0,0,0.3);
       text-align: center;
+      transition: transform 0.3s ease;
+    }
+
+    .formulario:hover {
+      transform: scale(1.01);
     }
 
     h2 {
@@ -54,6 +61,7 @@
       border: 1px solid #ccc;
       border-radius: 8px;
       font-size: 16px;
+      resize: vertical;
     }
 
     button {
@@ -65,10 +73,21 @@
       border-radius: 8px;
       font-size: 16px;
       cursor: pointer;
+      transition: background 0.3s ease;
     }
 
     button:hover {
       background: #0056b3;
+    }
+
+    #contador {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #555;
+    }
+
+    .copiado {
+      background: #28a745 !important;
     }
   </style>
 </head>
@@ -98,12 +117,14 @@ MIGUELES PABLO EXEQUIEL
 Entre Ríos
 Pueblo General Belgrano"></textarea>
     <button onclick="generarTiquet()">Generar Tíquet</button>
-    <button onclick="copiarTiquet()">Copiar al portapapeles</button>
+    <button id="btnCopiar" onclick="copiarTiquet()">Copiar al portapapeles</button>
+    <div id="contador">🎫 Tíquets generados: <span id="totalTiquets">0</span></div>
     <textarea id="mensajeTiquet" rows="12" readonly style="margin-top:15px;"></textarea>
   </div>
 
   <script>
     let doc;
+    let tiquetCount = 0;
 
     function generarPDF() {
       const { jsPDF } = window.jspdf;
@@ -121,23 +142,13 @@ Pueblo General Belgrano"></textarea>
       facturaNum = facturaNum ? parseInt(facturaNum) + 1 : 1;
       localStorage.setItem("facturaNum", facturaNum);
 
-      const clausula = `
-Estimado/a cliente:
+      const clausula = `Estimado/a cliente:
 
-Le informamos que el monto de $5,000 abonado corresponde exclusivamente al proceso de evaluación y diagnóstico profesional, destinado a determinar su aptitud para trabajar bajo nuestra metodología.
-
-Actualmente gestionamos más de 557 clientes activos y hemos expandido nuestros servicios de forma digital, lo que nos permite ofrecer esta experiencia de manera remota. Como en todo proceso profesional, los resultados pueden variar.
+Le informamos que el monto de $5,000 abonado corresponde exclusivamente al proceso de evaluación y diagnóstico profesional...
 
 Resultado de su evaluación: RECHAZADO
 
-Lamentablemente, no podremos avanzar con una colaboración en este momento. Es importante destacar que el monto abonado ha sido consumido por el sistema en el proceso de análisis, y no se contempla ningún tipo de reembolso una vez iniciado el diagnóstico.
-
-Antes de realizar el pago, usted aceptó los términos informativos donde se especifica que el resultado puede ser aceptado o rechazado, y que no depende exclusivamente de nuestra decisión.
-
-Somos emprendedores comprometidos con la ética y la transparencia. Jamás nos hemos quedado con dinero ajeno, y trabajamos día a día para brindar lo mejor a cada cliente.
-
-Agradecemos su interés y le deseamos lo mejor en sus próximos proyectos.
-      `;
+Lamentablemente, no podremos avanzar con una colaboración en este momento...`;
 
       doc.setFont("helvetica", "bold");
       doc.setTextColor(0, 102, 204);
@@ -219,17 +230,29 @@ _¡Gracias por tu paciencia!_ 🙏
 ¡Esperamos tu comprensión!
 
 *Cliente:* ${nombre}
-**CUIL:* ${cuil}`;
+*CUIL:* ${cuil}`;
 
       document.getElementById("mensajeTiquet").value = mensaje;
+
+      // Actualizar contador visual
+      tiquetCount++;
+      document.getElementById("totalTiquets").textContent = tiquetCount;
     }
 
     function copiarTiquet() {
       const mensaje = document.getElementById("mensajeTiquet");
+      const boton = document.getElementById("btnCopiar");
       mensaje.select();
       mensaje.setSelectionRange(0, 99999);
       document.execCommand("copy");
-      alert("¡Mensaje copiado al portapapeles!");
+
+      // Feedback visual
+      boton.textContent = "¡Copiado!";
+      boton.classList.add("copiado");
+      setTimeout(() => {
+        boton.textContent = "Copiar al portapapeles";
+        boton.classList.remove("copiado");
+      }, 2000);
     }
 
     // Partículas animadas
