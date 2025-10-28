@@ -137,6 +137,44 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
+    /* Modal */
+    #modalMovimientos {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background-color: rgba(0,0,0,0.7);
+      backdrop-filter: blur(4px);
+      z-index: 999;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #modalContenido {
+      background-color: #2a2a2a;
+      padding: 30px;
+      border-radius: 15px;
+      max-height: 80vh;
+      overflow-y: auto;
+      width: 90%;
+      max-width: 600px;
+      position: relative;
+    }
+
+    #modalContenido h3 {
+      margin-top: 0;
+      color: var(--color-accent);
+    }
+
+    #cerrarModal {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      font-size: 20px;
+      color: var(--color-muted);
+      cursor: pointer;
+    }
+
     @media (max-width: 768px) {
       .contenedor {
         flex-direction: column;
@@ -174,22 +212,61 @@
     <div class="formulario" id="movimientos">
       <h2>📊 Movimientos</h2>
       <div id="listaMovimientos"></div>
+      <button onclick="abrirModal()" id="btnVerMas" style="display:none;">Ver más</button>
     </div>
   </div>
 
-  <!-- Scripts -->
+  <!-- Modal -->
+  <div id="modalMovimientos">
+    <div id="modalContenido">
+      <span id="cerrarModal" onclick="cerrarModal()">✖</span>
+      <h3>Todos los movimientos</h3>
+      <div id="listaCompleta"></div>
+    </div>
+  </div>
   <script>
     let doc;
     let tiquetCount = 0;
     let resumenFacturaActual = "";
+    const movimientos = [];
 
     function registrarMovimiento(tipo, resumen) {
-      const lista = document.getElementById("listaMovimientos");
       const fecha = new Date().toLocaleString();
-      const div = document.createElement("div");
-      div.className = "movimiento";
-      div.innerHTML = `<strong>${tipo}</strong> • ${fecha}<br>${resumen}`;
-      lista.prepend(div);
+      const registro = { tipo, resumen, fecha };
+      movimientos.unshift(registro); // más reciente primero
+      actualizarVistaMovimientos();
+    }
+
+    function actualizarVistaMovimientos() {
+      const lista = document.getElementById("listaMovimientos");
+      lista.innerHTML = "";
+
+      movimientos.slice(0, 5).forEach(m => {
+        const div = document.createElement("div");
+        div.className = "movimiento";
+        div.innerHTML = `<strong>${m.tipo}</strong> • ${m.fecha}<br>${m.resumen}`;
+        lista.appendChild(div);
+      });
+
+      document.getElementById("btnVerMas").style.display = movimientos.length > 5 ? "inline-block" : "none";
+    }
+
+    function abrirModal() {
+      const listaCompleta = document.getElementById("listaCompleta");
+      listaCompleta.innerHTML = "";
+
+      movimientos.forEach(m => {
+        const div = document.createElement("div");
+        div.className = "movimiento";
+        div.innerHTML = `<strong>${m.tipo}</strong> • ${m.fecha}<br>${m.resumen}`;
+        listaCompleta.appendChild(div);
+      });
+
+      document.getElementById("modalMovimientos").style.display = "flex";
+    }
+
+    function cerrarModal() {
+      document.getElementById("modalMovimientos").style.display = "none";
     }
 
     function generarPDF() {
@@ -229,7 +306,8 @@ de evaluación y diagnóstico profesional...`;
       doc.text(`Edad: ${edad}`, 20, 60);
       doc.text(`Provincia: ${provincia}`, 20, 67);
       doc.text(`Localidad: ${localidad}`, 20, 74);
-            doc.line(20, 80, 190, 80);
+
+      doc.line(20, 80, 190, 80);
       doc.setFont("helvetica", "bold");
       doc.text("Detalle de Factura:", 20, 88);
       doc.setFont("helvetica", "normal");
