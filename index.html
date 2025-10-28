@@ -24,16 +24,23 @@
       z-index: 0;
     }
 
-    .formulario {
-      position: relative;
+    .contenedor {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 30px;
+      padding: 40px 20px;
       z-index: 1;
+      position: relative;
+    }
+
+    .formulario {
+      flex: 1 1 320px;
+      max-width: 600px;
       background: rgba(255, 255, 255, 0.95);
-      padding: 30px;
-      max-width: 700px;
-      margin: 60px auto;
+      padding: 25px;
       border-radius: 15px;
-      box-shadow: 0 0 30px rgba(0,0,0,0.3);
-      text-align: center;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
       transition: transform 0.3s ease;
     }
 
@@ -42,42 +49,44 @@
     }
 
     h2 {
-      font-size: 28px;
-      margin-bottom: 20px;
+      font-size: 24px;
+      margin-bottom: 15px;
       color: #007bff;
     }
 
     label {
       display: block;
-      margin-top: 15px;
+      margin-top: 10px;
       font-weight: 600;
       text-align: left;
     }
 
     textarea {
       width: 100%;
-      padding: 12px;
+      padding: 10px;
       margin-top: 5px;
       border: 1px solid #ccc;
       border-radius: 8px;
-      font-size: 16px;
+      font-size: 15px;
       resize: vertical;
     }
 
     button {
-      margin-top: 20px;
+      margin-top: 15px;
       padding: 12px 25px;
-      background: #007bff;
+      background: linear-gradient(to bottom, #007bff, #0056b3);
       color: white;
       border: none;
-      border-radius: 8px;
-      font-size: 16px;
+      border-radius: 10px;
+      font-size: 15px;
       cursor: pointer;
-      transition: background 0.3s ease;
+      box-shadow: 0 4px 0 #003d80;
+      transition: transform 0.1s ease, box-shadow 0.1s ease;
     }
 
-    button:hover {
-      background: #0056b3;
+    button:active {
+      transform: translateY(2px);
+      box-shadow: 0 2px 0 #003d80;
     }
 
     #contador {
@@ -89,37 +98,46 @@
     .copiado {
       background: #28a745 !important;
     }
+
+    @media (max-width: 768px) {
+      .contenedor {
+        flex-direction: column;
+        padding: 20px 10px;
+      }
+    }
   </style>
 </head>
 <body>
   <canvas id="particles"></canvas>
 
-  <div class="formulario">
-    <h2>🚀 Facturador Electrónico</h2>
-    <label>Pegá los datos del cliente:</label>
-    <textarea id="datosCliente" rows="6" placeholder="Ejemplo:
+  <div class="contenedor">
+    <div class="formulario">
+      <h2>🚀 Facturador Electrónico</h2>
+      <label>Pegá los datos del cliente:</label>
+      <textarea id="datosCliente" rows="6" placeholder="Ejemplo:
 AYBAR MAXIMILIANO RICARDO
 20-36520980-5
 33 años
 Buenos Aires (Pcia)
 Villa Dominico"></textarea>
-    <button onclick="vistaPrevia()">Vista previa</button>
-    <button onclick="descargarPDF()">Descargar PDF</button>
-  </div>
+      <button onclick="vistaPrevia()">Vista previa</button>
+      <button onclick="descargarPDF()">Descargar PDF</button>
+    </div>
 
-  <div class="formulario">
-    <h2>🎫 Generador de Tíquet</h2>
-    <label>Ingresá los datos del cliente:</label>
-    <textarea id="datosTiquet" rows="6" placeholder="Ejemplo:
+    <div class="formulario">
+      <h2>🎫 Generador de Tíquet</h2>
+      <label>Ingresá los datos del cliente:</label>
+      <textarea id="datosTiquet" rows="6" placeholder="Ejemplo:
 MIGUELES PABLO EXEQUIEL
 20-31567255-5
 40 años
 Entre Ríos
 Pueblo General Belgrano"></textarea>
-    <button onclick="generarTiquet()">Generar Tíquet</button>
-    <button id="btnCopiar" onclick="copiarTiquet()">Copiar al portapapeles</button>
-    <div id="contador">🎫 Tíquets generados: <span id="totalTiquets">0</span></div>
-    <textarea id="mensajeTiquet" rows="12" readonly style="margin-top:15px;"></textarea>
+      <button onclick="generarTiquet()">Generar Tíquet</button>
+      <button id="btnCopiar" onclick="copiarTiquet()">Copiar al portapapeles</button>
+      <div id="contador">🎫 Tíquets generados: <span id="totalTiquets">0</span></div>
+      <textarea id="mensajeTiquet" rows="12" readonly style="margin-top:15px;"></textarea>
+    </div>
   </div>
 
   <script>
