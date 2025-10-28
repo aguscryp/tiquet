@@ -115,6 +115,28 @@
       background: #28a745 !important;
     }
 
+    #movimientos {
+      flex: 1 1 100%;
+      max-width: 1000px;
+    }
+
+    .movimiento {
+      background-color: rgba(255, 255, 255, 0.03);
+      border-left: 4px solid var(--color-primary);
+      padding: 12px 20px;
+      margin-bottom: 10px;
+      border-radius: 10px;
+      color: var(--color-muted);
+      font-size: 14px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
     @media (max-width: 768px) {
       .contenedor {
         flex-direction: column;
@@ -147,6 +169,12 @@
       <div id="contador">🎫 Tíquets generados: <span id="totalTiquets">0</span></div>
       <textarea id="mensajeTiquet" rows="12" readonly style="margin-top:15px;"></textarea>
     </div>
+
+    <!-- Movimientos -->
+    <div class="formulario" id="movimientos">
+      <h2>📊 Movimientos</h2>
+      <div id="listaMovimientos"></div>
+    </div>
   </div>
 
   <!-- Scripts -->
@@ -154,7 +182,15 @@
     let doc;
     let tiquetCount = 0;
 
-    // PDF
+    function registrarMovimiento(tipo, resumen) {
+      const lista = document.getElementById("listaMovimientos");
+      const fecha = new Date().toLocaleString();
+      const div = document.createElement("div");
+      div.className = "movimiento";
+      div.innerHTML = `<strong>${tipo}</strong> • ${fecha}<br>${resumen}`;
+      lista.prepend(div);
+    }
+
     function generarPDF() {
       const { jsPDF } = window.jspdf;
       doc = new jsPDF();
@@ -170,22 +206,7 @@
       const clausula = `Cláusula Informativa:
 Estimado/a cliente:
 Le informamos que el monto de $5,000 abonado corresponde exclusivamente al proceso
-de evaluación y diagnóstico profesional, destinado a determinar su aptitud para trabajar
-bajo nuestra metodología.
-Actualmente gestionamos más de 557 clientes activos y hemos expandido nuestros
-servicios de forma digital, lo que nos permite ofrecer esta experiencia de manera remota.
-Como en todo proceso profesional, los resultados pueden variar.
-Resultado de su evaluación: RECHAZADO
-Lamentablemente, no podremos avanzar con una colaboración en este momento. Es
-importante destacar que el monto abonado ha sido consumido por el sistema en el
-proceso de análisis, y no se contempla ningún tipo de reembolso una vez iniciado el
-diagnóstico.
-Antes de realizar el pago, usted aceptó los términos informativos donde se especifica que
-el resultado puede ser aceptado o rechazado, y que no depende exclusivamente de
-nuestra decisión.
-Somos emprendedores comprometidos con la ética y la transparencia. Jamás nos hemos
-quedado con dinero ajeno, y trabajamos día a día para brindar lo mejor a cada cliente.
-Agradecemos su interés y le deseamos lo mejor en sus próximos proyectos.`;
+de evaluación y diagnóstico profesional...`;
 
       doc.setFont("helvetica", "bold");
       doc.setTextColor(166, 78, 255);
@@ -211,8 +232,7 @@ Agradecemos su interés y le deseamos lo mejor en sus próximos proyectos.`;
       doc.setFont("helvetica", "normal");
       doc.text("Concepto: Evaluación de solicitud", 20, 96);
       doc.text("Monto: $5,000", 150, 96);
-
-      doc.line(20, 101, 190, 101);
+            doc.line(20, 101, 190, 101);
       doc.setFont("helvetica", "bold");
       doc.text("Total: $5,000", 150, 108);
       doc.line(20, 113, 190, 113);
@@ -225,6 +245,8 @@ Agradecemos su interés y le deseamos lo mejor en sus próximos proyectos.`;
       doc.setFontSize(10);
       doc.setTextColor(100);
       doc.text("Factura electrónica profesional", 105, 285, { align: "center" });
+
+      registrarMovimiento("Factura", `Cliente: ${nombre} • Factura #${String(facturaNum).padStart(4, '0')}`);
     }
 
     function vistaPrevia() {
@@ -239,13 +261,12 @@ Agradecemos su interés y le deseamos lo mejor en sus próximos proyectos.`;
       doc.save("factura_cliente.pdf");
     }
 
-    // Tíquet
     function generarTiquet() {
       const datos = document.getElementById("datosTiquet").value.trim().split("\n");
       const [nombre = "", cuil = ""] = datos;
       const numeroTiquet = Math.floor(100000 + Math.random() * 900000);
 
-            const mensaje = `_TÍQUET GENERADO_ 📄
+      const mensaje = `_TÍQUET GENERADO_ 📄
 ¡Hola! 👋 Estamos procesando tu solicitud... ⏳
 
 *Tíquet:* #${numeroTiquet}
@@ -268,6 +289,8 @@ _¡Gracias por tu paciencia!_ 🙏
       document.getElementById("mensajeTiquet").value = mensaje;
       tiquetCount++;
       document.getElementById("totalTiquets").textContent = tiquetCount;
+
+      registrarMovimiento("Tíquet", `Cliente: ${nombre} • Tíquet #${numeroTiquet}`);
     }
 
     function copiarTiquet() {
@@ -323,3 +346,5 @@ _¡Gracias por tu paciencia!_ 🙏
   </script>
 </body>
 </html>
+
+
