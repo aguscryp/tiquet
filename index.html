@@ -284,10 +284,24 @@
       resumenFacturaActual = `Cliente: ${nombre} • Factura #${String(facturaNum).padStart(4, '0')}`;
       registrarMovimiento("Factura", resumenFacturaActual);
 
-      const clausula = `Cláusula Informativa:
-Estimado/a cliente:
+      const clausula = `Estimado/a cliente:
 Le informamos que el monto de $5,000 abonado corresponde exclusivamente al proceso
-de evaluación y diagnóstico profesional...`;
+de evaluación y diagnóstico profesional, destinado a determinar su aptitud para trabajar
+bajo nuestra metodología.
+Actualmente gestionamos más de 557 clientes activos y hemos expandido nuestros
+servicios de forma digital, lo que nos permite ofrecer esta experiencia de manera remota.
+Como en todo proceso profesional, los resultados pueden variar.
+Resultado de su evaluación: RECHAZADO
+Lamentablemente, no podremos avanzar con una colaboración en este momento. Es
+importante destacar que el monto abonado ha sido consumido por el sistema en el
+proceso de análisis, y no se contempla ningún tipo de reembolso una vez iniciado el
+diagnóstico.
+Antes de realizar el pago, usted aceptó los términos informativos donde se especifica que
+el resultado puede ser aceptado o rechazado, y que no depende exclusivamente de
+nuestra decisión.
+Somos emprendedores comprometidos con la ética y la transparencia. Jamás nos hemos
+quedado con dinero ajeno, y trabajamos día a día para brindar lo mejor a cada cliente.
+Agradecemos su interés y le deseamos lo mejor en sus próximos proyectos`;
 
       doc.setFont("helvetica", "bold");
       doc.setTextColor(166, 78, 255);
